@@ -2,20 +2,23 @@ package com.example.poshell.db;
 
 import com.example.poshell.model.Cart;
 import com.example.poshell.model.Product;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class PosInMemoryDB implements PosDB {
-    private List<Product> products = new ArrayList<>();
-
+public class MongoPos implements PosDB {
     private Cart cart;
+
+    private final PosRepository posRepository;
 
     @Override
     public List<Product> getProducts() {
-        return products;
+        var ret = new ArrayList<Product>();
+        posRepository.findAll().forEach(ret::add);
+        return ret;
     }
 
     @Override
@@ -31,17 +34,11 @@ public class PosInMemoryDB implements PosDB {
 
     @Override
     public Product getProduct(String productId) {
-        for (Product p : getProducts()) {
-            if (p.getId().equals(productId)) {
-                return p;
-            }
-        }
-        return null;
+        return posRepository.findById(productId).orElse(null);
     }
 
-    private PosInMemoryDB() {
-        this.products.add(new Product("PD1", "iPhone 13", 8999));
-        this.products.add(new Product("PD2", "MacBook Pro", 29499));
+    @Autowired
+    private MongoPos(PosRepository repo) {
+        posRepository = repo;
     }
-
 }
