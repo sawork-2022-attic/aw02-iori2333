@@ -5,6 +5,7 @@ import com.example.poshell.model.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
+import org.springframework.shell.standard.ShellOption;
 
 @ShellComponent
 public class PosCommand {
@@ -36,6 +37,24 @@ public class PosCommand {
         if (posService.add(productId, amount)) {
             return posService.getCart().toString();
         }
-        return "ERROR";
+        return "Error adding product: " + productId;
+    }
+
+    @ShellMethod(value = "Remove a Product from Cart", key = "r")
+    public String removeFromCart(String productId, @ShellOption(defaultValue = "1") int amount) {
+        if (posService.remove(productId, amount)) {
+            return posService.getCart().toString();
+        }
+        return "Error removing product: " + productId + "not found";
+    }
+
+    @ShellMethod(value = "Checkout", key = "c")
+    public String checkout() {
+        return posService.checkout();
+    }
+
+    @ShellMethod(value = "Clear Cart", key = "cl")
+    public String clearCart() {
+        return posService.clear() ? "Cleared cart OK" : "Error clearing cart: no cart found";
     }
 }

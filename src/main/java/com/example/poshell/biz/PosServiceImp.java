@@ -30,13 +30,15 @@ public class PosServiceImp implements PosService {
     }
 
     @Override
-    public void checkout(Cart cart) {
-
+    public String checkout() {
+        var cart = this.getCart();
+        if (cart == null) return "No cart available";
+        return cart.toString();
     }
 
     @Override
-    public void total(Cart cart) {
-
+    public double total(Cart cart) {
+        return cart.getItems().stream().mapToDouble(Item::getPrice).sum();
     }
 
     @Override
@@ -46,11 +48,31 @@ public class PosServiceImp implements PosService {
 
     @Override
     public boolean add(String productId, int amount) {
-
+        if (amount < 0) {
+            return false;
+        }
         Product product = posDB.getProduct(productId);
         if (product == null) return false;
 
-        this.getCart().addItem(new Item(product, amount));
+        return this.getCart().addItem(new Item(product, amount));
+    }
+
+    @Override
+    public boolean remove(String productId, int amount) {
+        if (amount < 0) {
+            return false;
+        }
+        var product = posDB.getProduct(productId);
+        var cart = this.getCart();
+        if (product == null || cart == null) return false;
+        return cart.removeItem(productId, amount);
+    }
+
+    @Override
+    public boolean clear() {
+        var cart = this.getCart();
+        if (cart == null) return false;
+        cart.clear();
         return true;
     }
 
